@@ -5,9 +5,7 @@ interface TreeMenuProps {
   pages: PageId[];
 }
 
-export const TreeMenu = ({
-  pages
-}: TreeMenuProps) => {
+export const TreeMenu = ({ pages }: TreeMenuProps) => {
   return (
     <div className="tree-menu">
       {pages.map((pageId) => (
