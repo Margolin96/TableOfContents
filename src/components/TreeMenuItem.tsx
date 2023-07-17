@@ -48,8 +48,10 @@ export const TreeMenuItem = ({ id }: TreeMenuItemProps) => {
                   'border-x-transparent',
                   'border-b-[6px]',
                   'border-b-black',
-                  'rotate-90',
-                  { 'rotate-180': isExpanded }
+                  {
+                    'rotate-90': !isExpanded,
+                    'rotate-180': isExpanded
+                  }
                 )} />
               )}
             </div>
