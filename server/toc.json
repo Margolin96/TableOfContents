@@ -38,7 +38,13 @@
         "url": "accessibility.html",
         "parentId": "Getting_started",
         "level": 1,
-        "tabIndex": 0
+        "tabIndex": 0,
+        "anchors": [
+          "Working_Offline",
+          "Migrating_from_Eclipse_to_IntelliJ_IDEA",
+          "NetBeans",
+          "product__educational_tools"
+        ]
       },
       "Discover_IntelliJ_IDEA": {
         "pages": [
@@ -59,7 +65,12 @@
         "url": "guided-tour-around-the-user-interface.html",
         "parentId": "Discover_IntelliJ_IDEA",
         "level": 2,
-        "tabIndex": 0
+        "tabIndex": 0,
+        "anchors": [
+          "anch1",
+          "anch2",
+          "anch3"
+        ]
       },
       "Pro_Tips": {
         "id": "Pro_Tips",
@@ -1989,7 +2000,7 @@
         "id": "Maven_Support",
         "title": "Maven",
         "url": "maven-support.html",
-        "parentId": "Build_Tools",
+        "parentId": "67944600",
         "level": 2,
         "tabIndex": 0
       },
@@ -14246,6 +14257,36 @@
         "parentId": "acd00c1",
         "level": 1,
         "tabIndex": 5
+      }
+    },
+    "anchors": {
+      "Working_Offline": {
+        "id": "Working_Offline",
+        "title": "Working Offline",
+        "url": "",
+        "anchor": "#Working_Offline",
+        "level": 1
+      },
+      "Migrating_from_Eclipse_to_IntelliJ_IDEA": {
+        "id": "Migrating_from_Eclipse_to_IntelliJ_IDEA",
+        "title": "Migrating from Eclipse to IntelliJ IDEA",
+        "url": "",
+        "anchor": "#Migrating_from_Eclipse_to_IntelliJ_IDEA",
+        "level": 1
+      },
+      "NetBeans": {
+        "id": "NetBeans",
+        "title": "Net Beans",
+        "url": "",
+        "anchor": "#NetBeans",
+        "level": 1
+      },
+      "product__educational_tools": {
+        "id": "product__educational_tools",
+        "title": "product educational tools",
+        "url": "",
+        "anchor": "#product__educational_tools",
+        "level": 1
       }
     }
   },

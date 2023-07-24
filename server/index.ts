@@ -2,6 +2,13 @@ import express, { Express, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 
+import type {
+  Anchor,
+  AnchorsMap,
+  PageId,
+  PagesMap,
+} from '../src/types';
+
 dotenv.config();
 
 /**
@@ -24,14 +31,29 @@ const json_path = `${__dirname}/${process.env.JSON_PATH || 'toc.json'}`;
 
 /**
  * Data object obtained from the JSON file
- * @type {any}
  */
-const data = require(json_path);
+const data: {
+  entities: {
+    pages: PagesMap;
+    anchors: AnchorsMap;
+  };
+  topLevelIds: PageId[];
+} = require(json_path);
 
 /**
- * TODO: add comment
+ * Enabling CORS for the app.
  */
 app.use(cors());
+
+/**
+ * Adds a 2-second delay to all incoming requests.
+ */
+app.all('*', (req, res, next) => {
+  setTimeout(() => {
+    next();
+  }, 2000);
+});
+
 
 /**
  * Start the server
@@ -67,6 +89,22 @@ app.get('/entities/pages', (req: Request, res: Response) => {
  */
 app.get('/entities/pages/:id', (req: Request, res: Response) => {
   res.end( JSON.stringify(data.entities.pages[req.params.id], null, 2) );
+});
+
+/**
+ * Route to get a list of anchors for a specific page by ID
+ * @param {PageId} req.params.id - Requested page ID
+ */
+app.get('/entities/pages/:id/anchors', (req: Request, res: Response) => {
+  const anchors: Anchor[] = [];
+
+  data.entities.pages[req.params.id]?.anchors?.forEach((anchorId) => {
+    if (data.entities?.anchors[anchorId]) {
+      anchors.push(data.entities.anchors[anchorId]);
+    }
+  });
+
+  res.end( JSON.stringify(anchors, null, 2) );
 });
 
 /**
