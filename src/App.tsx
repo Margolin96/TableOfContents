@@ -1,7 +1,7 @@
 import React from 'react';
 import './App.css';
 import { TreeMenu } from './components/TreeMenu';
-import { usePages, useTopLevelIds } from './store/store';
+import { usePages, useTopLevelIds } from './store/api';
 
 export default function App() {
   const pages = usePages();

@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { usePage } from "../store/store";
+import { usePage } from "../store/api";
 import { PageId } from "../types";
 import classNames from "classnames";
 import { TreeMenuGroup } from "./TreeMenuGroup";
