@@ -1,7 +1,9 @@
 import { PageId, PagesMap } from "../types";
+import { pagesAtom, selectedPageAtom } from "../store/store";
 import { TreeMenuGroup } from "./TreeMenuGroup";
-import { Provider } from "jotai";
+import { Provider, useAtom, useSetAtom } from "jotai";
 import { TreeMenuItemHolder } from "./TreeMenuItemHolder";
+import { useEffect } from "react";
 
 interface TreeMenuProps {
   isLoading: Boolean;
@@ -42,8 +44,28 @@ export const TreeMenu = (props: TreeMenuProps) => {
 };
 
 export const TreeMenuWrapper = ({
+  selectedId,
+  pages,
   topLevelIds,
+  onPageSelect,
 }: TreeMenuProps) => {
+  const setPages = useSetAtom(pagesAtom);
+  const [selected, setSelected] = useAtom(selectedPageAtom);
+
+  useEffect(() => {
+    onPageSelect?.(selected);
+  }, [onPageSelect, selected]);
+
+  useEffect(() => {
+    if (selectedId !== undefined) {
+      setSelected(selectedId);
+    }
+  }, [selectedId, setSelected]);
+
+  useEffect(() => {
+    setPages(pages);
+  }, [pages, setPages]);
+
   return (
     <>
       <TreeMenuGroup items={topLevelIds} />

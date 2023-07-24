@@ -1,69 +1,85 @@
-import { useCallback, useState } from "react";
-import { usePage } from "../store/api";
-import { PageId } from "../types";
 import classNames from "classnames";
+import { useCallback, useMemo } from "react";
+import { AnchorId, PageId } from "../types";
 import { TreeMenuGroup } from "./TreeMenuGroup";
-import { TreeMenuItemHolder } from "./TreeMenuItemHolder";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { expandedIdsAtom, pagesAtom, selectedPageAtom, updateExpandedByIdAtom } from "../store/store";
+import { Triangle } from "./Triangle";
+import { AnchorsList } from "./AnchorsList";
+import { getPaddingLeftClass } from "./utils";
 
 interface TreeMenuItemProps {
-  id: PageId;
+  id: PageId | AnchorId;
 }
 
 export const TreeMenuItem = ({ id }: TreeMenuItemProps) => {
-  const [isExpanded, setIsExpanded] = useState<Boolean>(false);
-  const page = usePage(id);
+  const [selected, setSelected] = useAtom(selectedPageAtom);
+  const setExpanded = useSetAtom(updateExpandedByIdAtom);
+  const expanded = useAtomValue(expandedIdsAtom);
+  const pages = useAtomValue(pagesAtom);
 
-  const clickHandler = useCallback(() => {
-    if (!page.data?.pages) return;
+  const page = useMemo(() => {
+    return (id in pages) ? pages[id] : null;
+  }, [pages, id]);
 
-    setIsExpanded((isExpanded) => !isExpanded)
-  }, [page.data?.pages]);
+  const isSelected = useMemo(() => {
+    return page?.id === selected;
+  }, [page?.id, selected]);
 
-  return (
-    <>
-      {page.isLoading && <TreeMenuItemHolder level={0} />}
+  const isExpanded = useMemo(() => {
+    return page && expanded.has(page.id);
+  }, [expanded, page]);
 
-      {!page.isLoading && !page.data && 'Error'}
+  const hasPages = useMemo(() => {
+    return page?.pages && page.pages.length > 0;
+  }, [page?.pages]);
 
-      {!page.isLoading && page.data && (
-        <div>
-          <div
-            className={classNames(
-              'pr-8',
-              'py-2',
-              'flex',
-              'select-none',
-              'hover:bg-slate-200',
-              { 'cursor-pointer': page.data.pages },
-              `pl-${Math.min(64, 8 + 4 * page.data.level)}`,
-            )}
-            onClick={clickHandler}
-          >
-            <div className="w-4 flex flex-col justify-center">
-              {page.data.pages && (
-                <div className={classNames(
-                  'transition',
-                  'h-0',
-                  'w-0',
-                  'border-x-4',
-                  'border-x-transparent',
-                  'border-b-[6px]',
-                  'border-b-black',
-                  {
-                    'rotate-90': !isExpanded,
-                    'rotate-180': isExpanded
-                  }
-                )} />
-              )}
-            </div>
+  const hasAnchors = useMemo(() => {
+    return page?.anchors && page.anchors.length > 0;
+  }, [page?.anchors]);
 
-            {page.data.title}
-          </div>
-          {isExpanded && page.data.pages && (
-            <TreeMenuGroup items={page.data.pages} />
+  const pageClickHandler = useCallback(() => {
+    if (page) {
+      setSelected(page.id);
+    }
+
+    if (page && hasPages) {
+      setExpanded(page.id, !isExpanded);
+    }
+  }, [page, hasPages, setSelected, setExpanded, isExpanded]);
+
+  return page && (
+    <div>
+      <div
+        className={classNames(
+          "pr-8",
+          "py-2",
+          "flex",
+          "transition",
+          getPaddingLeftClass(page.level),
+          {
+            "font-semibold": isSelected,
+            "cursor-pointer": hasPages || !isSelected,
+            "hover:bg-neutral-100": hasPages || !isSelected,
+            "bg-neutral-100": isSelected && hasAnchors,
+          }
+        )}
+        onClick={pageClickHandler}
+      >
+        <div className="w-4 flex flex-none flex-col justify-center">
+          {page.pages && (
+            <Triangle className={isExpanded ? 'rotate-180' : 'rotate-90'} />
           )}
         </div>
-      )}
-    </>
-  )
+
+        <div className="text-ellipsis whitespace-nowrap overflow-hidden">
+          {page.title}
+        </div>
+      </div>
+
+      {isSelected && hasAnchors && <AnchorsList pageId={page.id} />}
+
+      {isExpanded && page.pages && <TreeMenuGroup items={page.pages} />}
+    </div>
+  );
 };
