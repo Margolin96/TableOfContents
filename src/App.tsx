@@ -1,6 +1,5 @@
-import React from 'react';
 import './App.css';
-import { TreeMenu } from './components/TreeMenu';
+import { TOC } from './components/TOC';
 import { usePages, useTopLevelIds } from './store/api';
 
 export default function App() {
@@ -15,9 +14,9 @@ export default function App() {
 
       <div className="flex flex-1">
         <div className="border-r-2 py-6 w-[280px]">
-          <TreeMenu
-            isLoading={pages.isLoading || topLevelIds.isLoading}
+          <TOC
             isError={pages.error || topLevelIds.error}
+            isLoading={pages.isLoading || topLevelIds.isLoading}
             pages={pages.data || {}}
             topLevelIds={topLevelIds.data || []}
           />

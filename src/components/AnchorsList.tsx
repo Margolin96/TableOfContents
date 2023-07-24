@@ -1,16 +1,21 @@
 import classNames from "classnames";
 import { useAtomValue } from "jotai";
-import { PageId } from "../types"
-import { pagesAtom } from "../store/store";
-import { getPaddingLeftClass } from "./utils";
-import { usePageAnchors } from "../store/api";
 import { useMemo } from "react";
-import { TreeMenuItemHolder } from "./TreeMenuItemHolder";
+
+import { usePageAnchors } from "../store/api";
+import { pagesAtom } from "../store/store";
+import { PageId } from "../types"
+
+import { Placeholder } from "./Placeholder";
+import { getPaddingLeftClass } from "./utils";
 
 interface AnchorsListProps {
   pageId: PageId;
 }
 
+/**
+ * Component to render a list of anchors for a specific page.
+ */
 export const AnchorsList = ({ pageId }: AnchorsListProps) => {
   const pages = useAtomValue(pagesAtom);
 
@@ -18,17 +23,21 @@ export const AnchorsList = ({ pageId }: AnchorsListProps) => {
     return pages[pageId];
   }, [pageId, pages]);
 
+  /**
+   * Fetch the page anchors for the specified page ID
+   */
   const anchors = usePageAnchors(pageId);
 
   return (
     <>
       {anchors.isLoading && page.anchors?.map((_, index) => (
-        <TreeMenuItemHolder level={page.level + 1} key={index} />
+        <Placeholder key={index} level={page.level + 1} />
       ))}
 
       {!anchors.isLoading && !anchors.error && anchors.data && (
         anchors.data.map((anchor) => (
           <div
+            key={anchor.id}
             className={classNames(
               "pr-8",
               "py-2",
@@ -40,13 +49,11 @@ export const AnchorsList = ({ pageId }: AnchorsListProps) => {
               "hover:bg-neutral-200",
               getPaddingLeftClass(anchor.level)
             )}
-            onClick={() => {/* TODO */}}
-            key={anchor.id}
+            onClick={() => {/* TODO: Handle anchor click */}}
           >
             <div className="w-4 flex flex-none"></div>
             <div className="text-ellipsis whitespace-nowrap overflow-hidden">
               {anchor.title}
-              {/* TODO: get anchors by IP */}
             </div>
           </div>
         ))

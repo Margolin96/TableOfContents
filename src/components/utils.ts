@@ -40,7 +40,5 @@ const paddingClasses = [
  */
 export const getPaddingLeftClass = (level: number): string => {
   // Ensure the level is within bounds of the array.
-  level = Math.max(0, Math.min(level, paddingClasses.length));
-
-  return paddingClasses[level];
+  return paddingClasses[Math.max(0, Math.min(level, paddingClasses.length))];
 };

@@ -1,6 +1,6 @@
-import express, { Express, Request, Response } from 'express';
-import dotenv from 'dotenv';
 import cors from 'cors';
+import dotenv from 'dotenv';
+import express, { Express, Request, Response } from 'express';
 
 import type {
   Anchor,
@@ -51,7 +51,7 @@ app.use(cors());
 app.all('*', (req, res, next) => {
   setTimeout(() => {
     next();
-  }, 2000);
+  }, 500);
 });
 
 
@@ -59,7 +59,7 @@ app.all('*', (req, res, next) => {
  * Start the server
  */
 app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
+  console.info(`Server is running at http://localhost:${port}`);
 });
 
 /**
