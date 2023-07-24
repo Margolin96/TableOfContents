@@ -1,8 +1,9 @@
 import { useCallback, useState } from "react";
 import { usePage } from "../store/store";
 import { PageId } from "../types";
-import { TreeMenu } from "./TreeMenu";
 import classNames from "classnames";
+import { TreeMenuGroup } from "./TreeMenuGroup";
+import { TreeMenuItemHolder } from "./TreeMenuItemHolder";
 
 interface TreeMenuItemProps {
   id: PageId;
@@ -20,7 +21,7 @@ export const TreeMenuItem = ({ id }: TreeMenuItemProps) => {
 
   return (
     <>
-      {page.isLoading && <div className="bg-blue-500">Loading</div>}
+      {page.isLoading && <TreeMenuItemHolder level={0} />}
 
       {!page.isLoading && !page.data && 'Error'}
 
@@ -58,8 +59,8 @@ export const TreeMenuItem = ({ id }: TreeMenuItemProps) => {
 
             {page.data.title}
           </div>
-          {isExpanded && (
-            <TreeMenu pages={page.data.pages} />
+          {isExpanded && page.data.pages && (
+            <TreeMenuGroup items={page.data.pages} />
           )}
         </div>
       )}
