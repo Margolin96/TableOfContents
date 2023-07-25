@@ -1,46 +1,115 @@
-# Getting Started with Create React App
+# Table of Contents Component
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Installation
 
-## Available Scripts
+Before running the TOC component or any associated parts, make sure to install the required dependencies. You can do this by navigating to the relevant directories (`/` - repository root, `/server`) and running the following command:
 
-In the project directory, you can run:
+```bash
+npm install
+```
 
-### `npm start`
+## Getting Started
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+To start the local web server, follow these steps:
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+1. Navigate to the `server` directory:
 
-### `npm test`
+```bash
+cd server
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+2. Run the development server:
 
-### `npm run build`
+```bash
+npm run dev
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+This will start the local web server, allowing you to serve the TOC component and other related content, and provide TOC contents through the API.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+To run the demo project with the TOC component, use the following command:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+npm start
+```
 
-### `npm run eject`
+This will launch the demo project, showcasing the functionality of the TOC component.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## Available Endpoints
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+The following endpoints are available for interacting with the TOC data through the API:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+`GET /topLevelIds`: Retrieves the top-level IDs from the TOC data.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+`GET /entities`: Retrieves all entities, including pages and anchors, from the TOC data.
 
-## Learn More
+`GET /entities/pages`: Retrieves all pages from the TOC data.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+`GET /entities/pages/:id`: Retrieves a specific page by its ID from the TOC data. Replace :id with the desired page ID.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+`GET /entities/pages/:id/anchors`: Retrieves a list of anchors for a specific page by its ID from the TOC data. Replace :id with the desired page ID.
+
+`GET /entities/anchors`: Retrieves all anchors from the TOC data.
+
+`GET /entities/anchors/:id`: Retrieves a specific anchor by its ID from the TOC data. Replace :id with the desired anchor ID.
+
+Please note that these endpoints are set up with a 2-second delay for all incoming requests, and the server is listening on the port specified by the environment variable **PORT** or **3001** by default.
+
+## Interfaces
+
+The TOC component can be customized using the following properties:
+
+```typescript
+interface TOCProps {
+  /**
+   * Indicates whether the TOC (table of contents) data is currently being loaded.
+   */
+  isLoading: Boolean;
+
+  /**
+   * Indicates whether an error occurred while loading the TOC data.
+   */
+  isError: Boolean;
+
+  /**
+   * Indicates whether a search functionality is available in the TOC.
+   */
+  hasSearch?: Boolean;
+
+  /**
+   * The ID of the selected page in the TOC.
+   */
+  selectedId?: PageId | null;
+
+  /**
+   * A map containing the data of all pages in the TOC.
+   */
+  pages: PagesMap;
+
+  /**
+   * An array of top-level page IDs in the TOC.
+   */
+  topLevelIds: PageId[];
+
+  /**
+   * A function to handle the change of the selected page in the TOC.
+   * @param {PageId | null} pageId - The ID of the selected page or null if no page is selected.
+   */
+  onPageSelect?: (pageId: PageId | null) => void;
+
+  /**
+   * A function to handle the change of the selected page in the TOC.
+   * @param {AnchorId | null} anchorId - The ID of the selected page or null if no page is selected.
+   */
+  onAnchorSelect?: (anchorId: AnchorId | null) => void;
+}
+```
+
+## Tests
+
+The TOC component comes with functional tests to ensure its proper functioning. To run the tests, use the following command at the root of the repository:
+
+```bash
+npm test
+```
+
+These tests will validate the different features and functionalities of the TOC component and ensure that it behaves as expected.
