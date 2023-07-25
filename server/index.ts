@@ -7,7 +7,7 @@ import type {
   AnchorsMap,
   PageId,
   PagesMap,
-} from '../src/types';
+} from '../src/types/types';
 
 dotenv.config();
 
@@ -19,13 +19,11 @@ const app: Express = express();
 
 /**
  * Port for the server to listen on
- * @type {number|string}
  */
 const port = process.env.PORT || 3001;
 
 /**
  * Path to the JSON file
- * @type {string}
  */
 const json_path = `${__dirname}/${process.env.JSON_PATH || 'toc.json'}`;
 
@@ -51,7 +49,7 @@ app.use(cors());
 app.all('*', (req, res, next) => {
   setTimeout(() => {
     next();
-  }, 500);
+  }, 1000);
 });
 
 

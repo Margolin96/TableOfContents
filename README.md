@@ -52,7 +52,7 @@ The following endpoints are available for interacting with the TOC data through 
 
 `GET /entities/anchors/:id`: Retrieves a specific anchor by its ID from the TOC data. Replace :id with the desired anchor ID.
 
-Please note that these endpoints are set up with a 2-second delay for all incoming requests, and the server is listening on the port specified by the environment variable **PORT** or **3001** by default.
+Please note that these endpoints are set up with a 1-second delay for all incoming requests, and the server is listening on the port specified by the environment variable **PORT** or **3001** by default.
 
 ## Interfaces
 
