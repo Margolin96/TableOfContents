@@ -10,6 +10,9 @@ import { Placeholder } from "./Placeholder";
 import { getPaddingLeftClass } from "./utils";
 
 interface AnchorsProps {
+  /**
+   * The ID of the page containing anchors.
+   */
   pageId: PageId;
 }
 
@@ -26,7 +29,7 @@ export const Anchors = ({ pageId }: AnchorsProps) => {
   // Fetch the page anchors for the specified page ID
   const anchors = usePageAnchors(pageId);
 
-  // Page item click handler.
+  // Anchor item click handler.
   const anchorClickHandler = useCallback((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     event.preventDefault();
     event.stopPropagation();

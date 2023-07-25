@@ -89,9 +89,7 @@ export const TOCWrapper = ({
 
   // Effect to update the selected page ID whenever the 'selectedId' prop changes.
   useEffect(() => {
-    if (selectedId !== undefined) {
-      setSelected(selectedId);
-    }
+    setSelected(selectedId || null);
   }, [selectedId, setSelected]);
 
   // Effect to set the 'pages' state whenever the 'pages' prop changes.
