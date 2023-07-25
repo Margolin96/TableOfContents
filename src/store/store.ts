@@ -1,11 +1,16 @@
 import { atom } from "jotai";
 
-import { Page, PageId, PagesMap } from "../types/types";
+import { AnchorId, Page, PageId, PagesMap } from "../types/types";
 
 /**
  * Atom to store the ID of the currently selected page or null if none is selected.
  */
 export const selectedPageAtom = atom<PageId | null, [id: PageId | null], void>(null, () => {});
+
+/**
+ * Atom to store the ID of the currently selected anchor or null if none is selected.
+ */
+export const selectedAnchorAtom = atom<AnchorId | null>(null);
 
 /**
  * Atom to store a set of expanded page IDs.
@@ -41,6 +46,7 @@ export const filteredPagesAtom = atom<Page[]>((get) => {
  */
 selectedPageAtom.write = (get, set, id) => {
   const pages = get(pagesAtom);
+  const selectedAnchor = get(selectedAnchorAtom);
 
   if (id === null || id in pages) {
     set(selectedPageAtom, id);
@@ -48,8 +54,10 @@ selectedPageAtom.write = (get, set, id) => {
 
   // Marking the IDs of page parents up to the root level as expanded.
   if (id !== null) {
-    let page = pages[id];
-    const breadcrumbs = new Set();
+    let currentPage = pages[id];
+    let page = currentPage.parentId ? pages[currentPage.parentId] : null;
+
+    const breadcrumbs = new Set(currentPage.id);
 
     while (page && page.level >= 0) {
       if (breadcrumbs.has(page.id)) {
@@ -60,7 +68,11 @@ selectedPageAtom.write = (get, set, id) => {
 
       breadcrumbs.add(page.id);
       set(updateExpandedByIdAtom, page.id, true);
-      page = pages[page.parentId];
+      page = page.parentId ? pages[page.parentId] : null;
+    }
+
+    if (selectedAnchor && !currentPage.anchors?.includes(selectedAnchor)) {
+      set(selectedAnchorAtom, null);
     }
   }
 };

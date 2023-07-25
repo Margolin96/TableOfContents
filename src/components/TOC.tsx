@@ -2,8 +2,8 @@ import classNames from "classnames";
 import { Provider, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect } from "react";
 
-import { filteredPagesAtom, pagesAtom, queryAtom, selectedPageAtom } from "../store/store";
-import { PageId, PagesMap } from "../types/types";
+import { filteredPagesAtom, pagesAtom, queryAtom, selectedAnchorAtom, selectedPageAtom } from "../store/store";
+import { AnchorId, PageId, PagesMap } from "../types/types";
 
 import { Group } from "./Group";
 import { PageItem } from "./PageItem";
@@ -46,6 +46,12 @@ interface TOCProps {
    * @param {PageId | null} pageId - The ID of the selected page or null if no page is selected.
    */
   onPageSelect?: (pageId: PageId | null) => void;
+
+  /**
+   * A function to handle the change of the selected page in the TOC.
+   * @param {AnchorId | null} anchorId - The ID of the selected page or null if no page is selected.
+   */
+  onAnchorSelect?: (anchorId: AnchorId | null) => void;
 }
 
 /**
@@ -59,6 +65,7 @@ export const TOCWrapper = ({
   pages,
   topLevelIds,
   onPageSelect,
+  onAnchorSelect,
 }: TOCProps) => {
   const filteredPages = useAtomValue(filteredPagesAtom);
   const query = useAtomValue(queryAtom);
@@ -66,18 +73,26 @@ export const TOCWrapper = ({
   // Get the setter for the 'pages' state.
   const setPages = useSetAtom(pagesAtom);
 
+  // Get the selected anchor ID.
+  const selectedAnchor = useAtomValue(selectedAnchorAtom);
+
   // Get the getter/setter for the selected page ID.
-  const [selected, setSelected] = useAtom(selectedPageAtom);
+  const [selectedPage, setSelectedPage] = useAtom(selectedPageAtom);
 
   // Effect to trigger the onPageSelect callback whenever the selected page changes.
   useEffect(() => {
-    onPageSelect?.(selected);
-  }, [onPageSelect, selected]);
+    onPageSelect?.(selectedPage);
+  }, [onPageSelect, selectedPage]);
+
+  // Effect to trigger the onAnchorSelect callback whenever the selected anchor changes.
+  useEffect(() => {
+    onAnchorSelect?.(selectedAnchor);
+  }, [onAnchorSelect, selectedAnchor]);
 
   // Effect to scroll into view currently selected page
   useEffect(() => {
-    if (!selected) return;
-    const element = document.getElementById(selected);
+    if (!selectedPage) return;
+    const element = document.getElementById(selectedPage);
 
     if (!element) return;
     const { top, bottom } = element.getBoundingClientRect();
@@ -85,12 +100,12 @@ export const TOCWrapper = ({
     if (top > 0 && bottom <= (window.innerHeight || document.documentElement.clientHeight)) return;
 
     element.scrollIntoView();
-  }, [selected]);
+  }, [selectedPage]);
 
   // Effect to update the selected page ID whenever the 'selectedId' prop changes.
   useEffect(() => {
-    setSelected(selectedId || null);
-  }, [selectedId, setSelected]);
+    setSelectedPage(selectedId || null);
+  }, [selectedId, setSelectedPage]);
 
   // Effect to set the 'pages' state whenever the 'pages' prop changes.
   useEffect(() => {

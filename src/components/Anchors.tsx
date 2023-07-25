@@ -1,10 +1,10 @@
 import classNames from "classnames";
-import { useAtomValue } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useMemo } from "react";
 
 import { usePageAnchors } from "../store/api";
-import { pagesAtom } from "../store/store";
-import { PageId } from "../types/types"
+import { pagesAtom, selectedAnchorAtom } from "../store/store";
+import { AnchorId, PageId } from "../types/types"
 
 import { Placeholder } from "./Placeholder";
 import { getPaddingLeftClass } from "./utils";
@@ -26,16 +26,21 @@ export const Anchors = ({ pageId }: AnchorsProps) => {
     return pages[pageId];
   }, [pageId, pages]);
 
+  const setSelectedAnchor = useSetAtom(selectedAnchorAtom);
+
   // Fetch the page anchors for the specified page ID
   const anchors = usePageAnchors(pageId);
 
   // Anchor item click handler.
-  const anchorClickHandler = useCallback((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+  const anchorClickHandler = useCallback((
+    event: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
+    id: AnchorId
+  ) => {
     event.preventDefault();
     event.stopPropagation();
 
-    // TODO: set selected anchor
-  }, []);
+    setSelectedAnchor(id);
+  }, [setSelectedAnchor]);
 
   return (
     <>
@@ -55,11 +60,11 @@ export const Anchors = ({ pageId }: AnchorsProps) => {
               "cursor-pointer",
               "bg-neutral-100",
               "hover:bg-neutral-200",
-              getPaddingLeftClass(page.level)
+              getPaddingLeftClass(anchor.level)
             )}
             href={`${page.url}${anchor.anchor}`}
             title={anchor.title}
-            onClick={anchorClickHandler}
+            onClick={(event) => anchorClickHandler(event, anchor.id)}
           >
             <div className="w-4 flex flex-none"></div>
             <div className="text-ellipsis whitespace-nowrap overflow-hidden">
