@@ -1,4 +1,4 @@
-import { PageId } from "../types";
+import { PageId } from "../types/types";
 
 import { PageItem } from "./PageItem";
 

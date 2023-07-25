@@ -1,6 +1,6 @@
 import useSWR from "swr";
 
-import { Anchor, Page, PageId } from "../types";
+import { Anchor, Page, PageId } from "../types/types";
 
 const API_URL = 'http://localhost:3001';
 

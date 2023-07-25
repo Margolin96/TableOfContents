@@ -1,6 +1,6 @@
 import { atom } from "jotai";
 
-import { PageId, PagesMap } from "../types";
+import { Page, PageId, PagesMap } from "../types/types";
 
 /**
  * Atom to store the ID of the currently selected page or null if none is selected.
@@ -18,9 +18,23 @@ export const expandedIdsAtom = atom(new Set<PageId>());
 export const updateExpandedByIdAtom = atom<null, [id: PageId, isExpanded: Boolean], void>(null, () => {});
 
 /**
+ * Atom to store the search query used to filter pages.
+ */
+export const queryAtom = atom<string | null>(null);
+
+/**
  * Atom to store a map of pages (key: page ID, value: page data).
  */
 export const pagesAtom = atom<PagesMap, [pages: PagesMap], void>({}, () => {});
+
+export const filteredPagesAtom = atom<Page[]>((get) => {
+  const query = get(queryAtom)?.toLowerCase();
+  const pages = Object.values(get(pagesAtom));
+
+  return query ? pages.filter((page) => {
+    return page.title.toLowerCase().includes(query);
+  }) : [];
+});
 
 /**
  * Custom write function for 'selectedPageAtom'.

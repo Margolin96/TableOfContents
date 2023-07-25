@@ -42,3 +42,18 @@ export const getPaddingLeftClass = (level: number): string => {
   // Ensure the level is within bounds of the array.
   return paddingClasses[Math.max(0, Math.min(level, paddingClasses.length))];
 };
+
+/**
+ * Creates a debounced version of a function.
+ * @param {Function} fn - The function to be debounced.
+ * @param {number} ms - The delay time in milliseconds. Defaults to 500 milliseconds.
+ * @returns {Function} The debounced version of the provided function.
+ */
+export const debounce = (fn: Function, ms: number = 500): Function => {
+  let timeoutId: ReturnType<typeof setTimeout>;
+
+  return function (this: any, ...args: any[]) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn.apply(this, args), ms);
+  };
+};

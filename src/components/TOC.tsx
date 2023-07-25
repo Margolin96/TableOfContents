@@ -1,11 +1,14 @@
-import { Provider, useAtom, useSetAtom } from "jotai";
+import classNames from "classnames";
+import { Provider, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect } from "react";
 
-import { pagesAtom, selectedPageAtom } from "../store/store";
-import { PageId, PagesMap } from "../types";
+import { filteredPagesAtom, pagesAtom, queryAtom, selectedPageAtom } from "../store/store";
+import { PageId, PagesMap } from "../types/types";
 
 import { Group } from "./Group";
+import { PageItem } from "./PageItem";
 import { Placeholder } from "./Placeholder";
+import { Search } from "./Search";
 
 interface TOCProps {
   /**
@@ -19,9 +22,14 @@ interface TOCProps {
   isError: Boolean;
 
   /**
+   * Indicates whether a search functionality is available in the TOC.
+   */
+  hasSearch?: Boolean;
+
+  /**
    * The ID of the selected page in the TOC.
    */
-  selectedId?: PageId;
+  selectedId?: PageId | null;
 
   /**
    * A map containing the data of all pages in the TOC.
@@ -46,11 +54,15 @@ interface TOCProps {
 export const TOCWrapper = ({
   isLoading,
   isError,
+  hasSearch,
   selectedId,
   pages,
   topLevelIds,
   onPageSelect,
 }: TOCProps) => {
+  const filteredPages = useAtomValue(filteredPagesAtom);
+  const query = useAtomValue(queryAtom);
+
   // Get the setter for the 'pages' state.
   const setPages = useSetAtom(pagesAtom);
 
@@ -61,6 +73,13 @@ export const TOCWrapper = ({
   useEffect(() => {
     onPageSelect?.(selected);
   }, [onPageSelect, selected]);
+
+  // Effect to scroll into view currently selected page
+  useEffect(() => {
+    if (!selected) return;
+
+    document.getElementById(selected)?.scrollIntoView();
+  }, [selected]);
 
   // Effect to update the selected page ID whenever the 'selectedId' prop changes.
   useEffect(() => {
@@ -96,7 +115,23 @@ export const TOCWrapper = ({
       )}
 
       {!isLoading && !isError && (
-        <Group items={topLevelIds} />
+        <div className="flex flex-col h-full">
+          {hasSearch && <div className="pt-6"><Search /></div>}
+
+          <div className={classNames(
+            'overflow-auto',
+            'scroll-smooth',
+            'scroll-p-6',
+            'pb-6',
+            { 'pt-6': !hasSearch }
+          )}>
+            {hasSearch && query && filteredPages.map((page, index) => (
+              <PageItem key={index} id={page.id} />
+            ))}
+
+            {(!hasSearch || !query) && <Group items={topLevelIds} />}
+          </div>
+        </div>
       )}
     </>
   );

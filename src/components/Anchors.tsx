@@ -4,19 +4,19 @@ import { useMemo } from "react";
 
 import { usePageAnchors } from "../store/api";
 import { pagesAtom } from "../store/store";
-import { PageId } from "../types"
+import { PageId } from "../types/types"
 
 import { Placeholder } from "./Placeholder";
 import { getPaddingLeftClass } from "./utils";
 
-interface AnchorsListProps {
+interface AnchorsProps {
   pageId: PageId;
 }
 
 /**
  * Component to render a list of anchors for a specific page.
  */
-export const AnchorsList = ({ pageId }: AnchorsListProps) => {
+export const Anchors = ({ pageId }: AnchorsProps) => {
   const pages = useAtomValue(pagesAtom);
 
   const page = useMemo(() => {
@@ -42,12 +42,11 @@ export const AnchorsList = ({ pageId }: AnchorsListProps) => {
               "pr-8",
               "py-2",
               "flex",
-              "select-none",
               "transition",
               "cursor-pointer",
               "bg-neutral-100",
               "hover:bg-neutral-200",
-              getPaddingLeftClass(anchor.level)
+              getPaddingLeftClass(page.level)
             )}
             onClick={() => {/* TODO: Handle anchor click */}}
           >

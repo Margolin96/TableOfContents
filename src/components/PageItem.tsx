@@ -3,9 +3,9 @@ import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useMemo } from "react";
 
 import { expandedIdsAtom, pagesAtom, selectedPageAtom, updateExpandedByIdAtom } from "../store/store";
-import { PageId } from "../types";
+import { PageId } from "../types/types";
 
-import { AnchorsList } from "./AnchorsList";
+import { Anchors } from "./Anchors";
 import { Group } from "./Group";
 import { Triangle } from "./Triangle";
 import { getPaddingLeftClass } from "./utils";
@@ -70,7 +70,7 @@ export const PageItem = ({ id }: PageItemProps) => {
   }, [page, hasPages, setSelected, setExpanded, isExpanded]);
 
   return page && (
-    <div>
+    <div id={page.id}>
       <div
         className={classNames(
           "pr-8",
@@ -98,7 +98,7 @@ export const PageItem = ({ id }: PageItemProps) => {
         </div>
       </div>
 
-      {isSelected && hasAnchors && <AnchorsList pageId={page.id} />}
+      {isSelected && hasAnchors && <Anchors pageId={page.id} />}
 
       {isExpanded && page.pages && <Group items={page.pages} />}
     </div>
