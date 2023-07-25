@@ -116,12 +116,12 @@ export const getFilteredPages = (
 
   Object.values(pages).forEach((page) => {
     if (page.title.toLowerCase().includes(sanitizedQuery)) {
-      filteredPages[page.id] = structuredClone(page);
+      filteredPages[page.id] = { ...page };
 
       const parentsIds = getAllParents(pages, page.id);
 
       parentsIds.forEach((pageId) => {
-        filteredPages[pageId] = structuredClone(pages[pageId]);
+        filteredPages[pageId] = { ...pages[pageId] };
       });
     }
   });

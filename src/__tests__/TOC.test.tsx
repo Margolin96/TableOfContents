@@ -1,6 +1,5 @@
-import { act, cleanup, render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event'
-import { mutate } from 'swr';
 
 import { TOC } from '../components/TOC';
 import { Anchor, PagesMap } from '../types/types';
@@ -33,10 +32,6 @@ const page2anchors: Anchor[] = [
 const topLevelIds = ['page1', 'page2'];
 
 describe('TOC', () => {
-  afterEach(() => {
-    cleanup();
-  });
-
   it('should render loading placeholder when isLoading is true', () => {
     render(
       <TOC
@@ -167,12 +162,10 @@ describe('TOC', () => {
 });
 
 describe('TOC - Anchors', () => {
-  afterEach(() => {
-    cleanup();
-  });
-
   it('should expand a list of anchors when page is selected', async () => {
-    mutate(`/pages/page2/anchors`, page2anchors);
+    global.fetch = jest.fn(() => {
+      return Promise.resolve({ json: () => Promise.resolve(page2anchors) })
+    }) as any;
 
     render(
       <TOC
@@ -194,9 +187,11 @@ describe('TOC - Anchors', () => {
   });
 
   it('should call onAnchorSelect callback passing a currently selected anchor ID', async () => {
-    const onAnchorSelectMock = jest.fn();
+    global.fetch = jest.fn(() => {
+      return Promise.resolve({ json: () => Promise.resolve(page2anchors) })
+    }) as any;
 
-    mutate(`/pages/page2/anchors`, page2anchors);
+    const onAnchorSelectMock = jest.fn();
 
     render(
       <TOC
@@ -223,10 +218,6 @@ describe('TOC - Anchors', () => {
 });
 
 describe('TOC - Search', () => {
-  afterEach(() => {
-    cleanup();
-  });
-
   const SEARCH_DEBOUNCE_DELAY = 500;
 
   it('should render search field only when hasSearch is true', () => {
@@ -272,15 +263,15 @@ describe('TOC - Search', () => {
     await act(() => delay(SEARCH_DEBOUNCE_DELAY - 100));
 
     // Expect pages to be unaffected after a short time
-    expect(screen.getByText(/page 1/i)).toBeInTheDocument();
-    expect(screen.getByText(/page 2/i)).toBeInTheDocument();
+    expect(screen.getByText(/Page 1/i)).toBeInTheDocument();
+    expect(screen.getByText(/Page 2/i)).toBeInTheDocument();
 
     // Wait for a short time more than the debounce delay
     await act(() => delay(200));
 
     // Expect pages to be filtered after the debounce delay
-    expect(screen.getByText(/page 1/i)).toBeInTheDocument();
-    expect(screen.queryByText(/page 2/i)).toBeNull();
+    expect(screen.getByText(/Page 1/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Page 2/i)).toBeNull();
   });
 
   it('should filter pages case-insensitively', async () => {
