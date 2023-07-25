@@ -23,7 +23,7 @@ export const usePages = () => {
  */
 export const usePageAnchors = (id: PageId) => {
   return useSWR(
-    `/anchors/${id}`,
+    `/pages/${id}/anchors`,
     (): Promise<Anchor[]> => fetch(`${API_URL}/entities/pages/${id}/anchors`).then(r => r.json()),
     swrConfig
   );

@@ -1,10 +1,12 @@
-import { act, cleanup, render, renderHook, screen } from '@testing-library/react';
+import { act, cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event'
-import { useAtomValue } from 'jotai';
+import { mutate } from 'swr';
 
-import { TOCWrapper } from '../components/TOC';
-import { selectedPageAtom } from '../store/store';
-import { PagesMap } from '../types/types';
+import { TOC } from '../components/TOC';
+import { Anchor, PagesMap } from '../types/types';
+
+// @ts-ignore
+globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
 async function delay(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
@@ -21,59 +23,49 @@ const FakeScrollIntoView = jest.fn();
 Element.prototype.scrollIntoView = FakeScrollIntoView;
 
 const pages: PagesMap = {
-  page1: {
-    id: 'page1', title: 'Page 1',
-    level: 0,
-    parentId: ''
-  },
-  page2: {
-    id: 'page2', title: 'Page 2',
-    level: 0,
-    parentId: ''
-  },
-  page3: {
-    id: 'page3', title: 'page 3',
-    level: 1,
-    parentId: 'page1'
-  },
-  page4: {
-    id: 'page4', title: 'page 4',
-    level: 1,
-    parentId: 'page1'
-  },
+  page1: { id: 'page1', title: 'Page 1', level: 0, parentId: '', pages: [ 'page3' ] },
+  page2: { id: 'page2', title: 'Page 2', level: 0, parentId: '', anchors: [ 'anchor1' ] },
+  page3: { id: 'page3', title: 'page 3', level: 1, parentId: 'page1' },
 };
+const page2anchors: Anchor[] = [
+  { id: 'anchor1', title: 'Anchor 1', url: '', anchor: '', level: 0 },
+];
 const topLevelIds = ['page1', 'page2'];
 
-describe('TOCWrapper', () => {
+describe('TOC', () => {
   afterEach(() => {
     cleanup();
   });
 
   it('should render loading placeholder when isLoading is true', () => {
-    render(<TOCWrapper {...{
-      isLoading: true,
-      isError: false,
-      pages,
-      topLevelIds,
-    }} />);
+    render(
+      <TOC
+        isError={false}
+        isLoading={true}
+        pages={pages}
+        topLevelIds={topLevelIds}
+      />
+    );
     
     expect(screen.getAllByTestId('placeholder')).toHaveLength(10);
   });
 
   it('should render error message when isError is true', () => {
-    render(<TOCWrapper {...{
-      isLoading: false,
-      isError: true,
-      pages,
-      topLevelIds,
-    }} />);
+    render(
+      <TOC
+        isError={true}
+        isLoading={false}
+        pages={pages}
+        topLevelIds={topLevelIds}
+      />
+    );
 
     expect(screen.getByText(/unable to load table of contents/i)).toBeInTheDocument();
   });
 
   it('should render TOC items when isLoading and isError are false', () => {
     render(
-      <TOCWrapper
+      <TOC
         isError={false}
         isLoading={false}
         pages={pages}
@@ -92,32 +84,11 @@ describe('TOCWrapper', () => {
     }
   });
 
-  it('should call onPageSelect callback passing a currently selected page ID', async () => {
-    const onPageSelectMock = jest.fn();
-
-    render(
-      <TOCWrapper
-        isError={false}
-        isLoading={false}
-        pages={pages}
-        topLevelIds={topLevelIds}
-        onPageSelect={onPageSelectMock}
-      />
-    );
-
-    await act(async () => {
-      userEvent.click(screen.getByText(/page 1/i));
-      await delay(100);
-    });
-
-    expect(onPageSelectMock).toHaveBeenCalledWith('page1');
-  });
-
   it('should scroll into view the selected page', async () => {
     FakeScrollIntoView.mockReset();
 
     render(
-      <TOCWrapper
+      <TOC
         isError={false}
         isLoading={false}
         pages={pages}
@@ -133,53 +104,125 @@ describe('TOCWrapper', () => {
     expect(FakeScrollIntoView).toHaveBeenCalled();
   });
 
-  it('should update the selected page ID when selectedId prop changes', () => {
+  it('should expand and collapse subtree when page is clicked', async () => {
+    render(
+      <TOC
+        isError={false}
+        isLoading={false}
+        pages={pages}
+        topLevelIds={topLevelIds}
+      />
+    );
+
+    expect(screen.queryByText(/page 3/i)).toBeNull();
+
+    await act(async () => {
+      userEvent.click(screen.getByText(/page 1/i));
+      await delay(100);
+    });
+
+    expect(screen.getByText(/page 3/i)).toBeInTheDocument();
+
+    await act(async () => {
+      userEvent.click(screen.getByText(/page 1/i));
+      await delay(100);
+    });
+
+    expect(screen.queryByText(/page 3/i)).toBeNull();
+  });
+
+  it('should call onPageSelect callback passing a currently selected page ID', async () => {
+    const onPageSelectMock = jest.fn();
+
     const { rerender } = render(
-      <TOCWrapper
+      <TOC
         isError={false}
         isLoading={false}
         pages={pages}
         topLevelIds={topLevelIds}
+        onPageSelect={onPageSelectMock}
       />
     );
 
-    const selectedPage = renderHook(() => useAtomValue(selectedPageAtom));
+    await act(async () => {
+      userEvent.click(screen.getByText(/page 1/i));
+      await delay(100);
+    });
 
-    expect(selectedPage.result.current).toBeNull();
+    expect(onPageSelectMock).toHaveBeenCalledWith('page1');
 
-    // Rerender with passing selectedId
     rerender(
-      <TOCWrapper
+      <TOC
         isError={false}
         isLoading={false}
         pages={pages}
-        selectedId="page1"
+        selectedId={'page2'}
         topLevelIds={topLevelIds}
+        onPageSelect={onPageSelectMock}
       />
-    );
+    )
 
-    const updatedSelectedPage = renderHook(() => useAtomValue(selectedPageAtom));
-
-    expect(updatedSelectedPage.result.current).toBe('page1');
-
-    // Rerender with a different selectedId
-    rerender(
-      <TOCWrapper
-        isError={false}
-        isLoading={false}
-        pages={pages}
-        selectedId="page2"
-        topLevelIds={topLevelIds}
-      />
-    );
-
-    const updatedSelectedPage2 = renderHook(() => useAtomValue(selectedPageAtom));
-    
-    expect(updatedSelectedPage2.result.current).toBe('page2');
+    expect(onPageSelectMock).toHaveBeenCalledWith('page2');
   });
 });
 
-describe('TOCWrapper - Search Functionality', () => {
+describe('TOC - Anchors', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('should expand a list of anchors when page is selected', async () => {
+    mutate(`/pages/page2/anchors`, page2anchors);
+
+    render(
+      <TOC
+        isError={false}
+        isLoading={false}
+        pages={pages}
+        topLevelIds={topLevelIds}
+      />
+    );
+
+    expect(screen.queryByText(/anchor 1/i)).toBeNull();
+
+    await act(async () => {
+      await userEvent.click(screen.getByText(/page 2/i));
+      await delay(100);
+    });
+
+    expect(screen.getByText(/anchor 1/i)).toBeInTheDocument();
+  });
+
+  it('should call onAnchorSelect callback passing a currently selected anchor ID', async () => {
+    const onAnchorSelectMock = jest.fn();
+
+    mutate(`/pages/page2/anchors`, page2anchors);
+
+    render(
+      <TOC
+        isError={false}
+        isLoading={false}
+        pages={pages}
+        topLevelIds={topLevelIds}
+        onAnchorSelect={onAnchorSelectMock}
+      />
+    );
+
+    await act(async () => {
+      userEvent.click(screen.getByText(/page 2/i));
+      await delay(200);
+    });
+
+    await act(async () => {
+      userEvent.click(screen.getByText(/anchor 1/i));
+      await delay(200);
+    });
+
+    expect(onAnchorSelectMock).toHaveBeenCalledWith('anchor1');
+  });
+});
+
+describe('TOC - Search', () => {
   afterEach(() => {
     cleanup();
   });
@@ -188,7 +231,7 @@ describe('TOCWrapper - Search Functionality', () => {
 
   it('should render search field only when hasSearch is true', () => {
     const { rerender } = render(
-      <TOCWrapper
+      <TOC
         isError={false}
         isLoading={false}
         pages={pages}
@@ -199,7 +242,7 @@ describe('TOCWrapper - Search Functionality', () => {
     expect(screen.queryByRole('searchbox')).toBeNull();
 
     rerender(
-      <TOCWrapper
+      <TOC
         hasSearch={true}
         isError={false}
         isLoading={false}
@@ -213,7 +256,7 @@ describe('TOCWrapper - Search Functionality', () => {
 
   it('should not filter pages immediately when query is provided', async () => {
     render(
-      <TOCWrapper
+      <TOC
         hasSearch={true}
         isError={false}
         isLoading={false}
@@ -242,7 +285,7 @@ describe('TOCWrapper - Search Functionality', () => {
 
   it('should filter pages case-insensitively', async () => {
     render(
-      <TOCWrapper
+      <TOC
         hasSearch={true}
         isError={false}
         isLoading={false}

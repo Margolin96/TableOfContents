@@ -27,7 +27,7 @@
     "build": "vite build",
     "lint": "eslint --ext .js,.ts,.tsx . ",
     "lint:fix": "eslint --fix --ext .js,.ts,.tsx . ",
-    "test": "jest",
+    "test": "jest --noStackTrace --randomize",
     "test:watch": "jest --watch"
   },
   "eslintConfig": {
