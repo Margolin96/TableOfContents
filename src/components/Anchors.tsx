@@ -51,7 +51,7 @@ export const Anchors = ({ pageId }: AnchorsProps) => {
             onClick={() => {/* TODO: Handle anchor click */}}
           >
             <div className="w-4 flex flex-none"></div>
-            <div className="text-ellipsis whitespace-nowrap overflow-hidden">
+            <div className="text-ellipsis whitespace-nowrap overflow-hidden" title={anchor.title}>
               {anchor.title}
             </div>
           </div>

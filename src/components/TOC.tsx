@@ -77,8 +77,14 @@ export const TOCWrapper = ({
   // Effect to scroll into view currently selected page
   useEffect(() => {
     if (!selected) return;
+    const element = document.getElementById(selected);
 
-    document.getElementById(selected)?.scrollIntoView();
+    if (!element) return;
+    const { top, bottom } = element.getBoundingClientRect();
+
+    if (top > 0 && bottom <= (window.innerHeight || document.documentElement.clientHeight)) return;
+
+    element.scrollIntoView();
   }, [selected]);
 
   // Effect to update the selected page ID whenever the 'selectedId' prop changes.

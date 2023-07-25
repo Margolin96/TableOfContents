@@ -93,7 +93,7 @@ export const PageItem = ({ id }: PageItemProps) => {
           )}
         </div>
 
-        <div className="text-ellipsis whitespace-nowrap overflow-hidden">
+        <div className="text-ellipsis whitespace-nowrap overflow-hidden" title={page.title}>
           {page.title}
         </div>
       </div>
