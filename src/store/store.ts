@@ -1,5 +1,6 @@
 import { atom } from "jotai";
 
+import { getAllParents } from "../components/utils";
 import { AnchorId, Page, PageId, PagesMap } from "../types/types";
 
 /**
@@ -48,28 +49,16 @@ selectedPageAtom.write = (get, set, id) => {
   const pages = get(pagesAtom);
   const selectedAnchor = get(selectedAnchorAtom);
 
-  if (id === null || id in pages) {
+  if (id && id in pages) {
     set(selectedPageAtom, id);
   }
 
   // Marking the IDs of page parents up to the root level as expanded.
   if (id !== null) {
-    let currentPage = pages[id];
-    let page = currentPage.parentId ? pages[currentPage.parentId] : null;
-
-    const breadcrumbs = new Set(currentPage.id);
-
-    while (page && page.level >= 0) {
-      if (breadcrumbs.has(page.id)) {
-        // Preventing looping.
-        console.warn('Recurring parent', page.id);
-        break;
-      }
-
-      breadcrumbs.add(page.id);
-      set(updateExpandedByIdAtom, page.id, true);
-      page = page.parentId ? pages[page.parentId] : null;
-    }
+    const currentPage = pages[id];
+    const parents = getAllParents(pages, id);
+    
+    parents.forEach((id) => set(updateExpandedByIdAtom, id, true));
 
     if (selectedAnchor && !currentPage.anchors?.includes(selectedAnchor)) {
       set(selectedAnchorAtom, null);

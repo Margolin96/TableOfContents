@@ -1,14 +1,14 @@
 import classNames from "classnames";
 import { Provider, useAtom, useAtomValue, useSetAtom } from "jotai";
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import { filteredPagesAtom, pagesAtom, queryAtom, selectedAnchorAtom, selectedPageAtom } from "../store/store";
+import { pagesAtom, selectedAnchorAtom, selectedPageAtom } from "../store/store";
 import { AnchorId, PageId, PagesMap } from "../types/types";
 
 import { Group } from "./Group";
-import { PageItem } from "./PageItem";
 import { Placeholder } from "./Placeholder";
 import { Search } from "./Search";
+import { getFilteredPages } from "./utils";
 
 interface TOCProps {
   /**
@@ -58,18 +58,12 @@ interface TOCProps {
  * Component to render the table of contents.
  */
 export const TOCWrapper = ({
-  isLoading,
-  isError,
-  hasSearch,
   selectedId,
   pages,
   topLevelIds,
   onPageSelect,
   onAnchorSelect,
 }: TOCProps) => {
-  const filteredPages = useAtomValue(filteredPagesAtom);
-  const query = useAtomValue(queryAtom);
-
   // Get the setter for the 'pages' state.
   const setPages = useSetAtom(pagesAtom);
 
@@ -113,56 +107,83 @@ export const TOCWrapper = ({
   }, [pages, setPages]);
 
   return (
-    <>
-      {isLoading && <>
-        <Placeholder level={0} />
-        <Placeholder level={1} />
-        <Placeholder level={1} />
-        <Placeholder level={1} />
-        <Placeholder level={2} />
-        <Placeholder level={2} />
-        <Placeholder level={2} />
-        <Placeholder level={2} />
-        <Placeholder level={0} />
-        <Placeholder level={0} />
-      </>}
-
-      {!isLoading && isError && (
-        <div className="px-6 py-2 text-red-400 italic text-sm">
-          Unable to load table of contents
-        </div>
-      )}
-
-      {!isLoading && !isError && (
-        <div className="flex flex-col h-full">
-          {hasSearch && <div className="pt-6"><Search /></div>}
-
-          <div className={classNames(
-            'overflow-auto',
-            'scroll-smooth',
-            'scroll-p-6',
-            'pb-6',
-            { 'pt-6': !hasSearch }
-          )}>
-            {hasSearch && query && filteredPages.map((page, index) => (
-              <PageItem key={index} id={page.id} />
-            ))}
-
-            {(!hasSearch || !query) && <Group items={topLevelIds} />}
-          </div>
-        </div>
-      )}
-    </>
+    <Group items={topLevelIds} />
   );
 };
 
 /**
  * Component to wrap the TOCWrapper with the Jotai Provider.
  */
-export const TOC = (props: TOCProps) => {
+export const TOC = ({
+  isLoading,
+  isError,
+  hasSearch,
+  topLevelIds,
+  selectedId,
+  pages,
+  onAnchorSelect,
+  onPageSelect,
+}: TOCProps) => {
+  const [query, setQuery] = useState<string>('');
+
+  const filtered = useMemo(() => {
+    return hasSearch && query.trim()
+      ? getFilteredPages(query, topLevelIds, pages)
+      : { topLevelIds, pages };
+  }, [hasSearch, pages, query, topLevelIds]);
+
   return (
-    <Provider>
-      <TOCWrapper {...props} />
-    </Provider>
+    <>
+      <div className="flex flex-col h-full">
+        {hasSearch && (
+          <div className="pt-6">
+            <Search onChange={setQuery} />
+          </div>
+        )}
+
+        {isLoading && (
+          <div className={classNames({ 'pt-6': !hasSearch })}>
+            <Placeholder level={0} />
+            <Placeholder level={1} />
+            <Placeholder level={1} />
+            <Placeholder level={1} />
+            <Placeholder level={2} />
+            <Placeholder level={2} />
+            <Placeholder level={2} />
+            <Placeholder level={2} />
+            <Placeholder level={0} />
+            <Placeholder level={0} />
+          </div>
+        )}
+
+        {!isLoading && isError && (
+          <div className="px-6 py-2 text-red-400 italic text-sm">
+            Unable to load table of contents
+          </div>
+        )}
+
+        {!isLoading && !isError && (
+          <div className={classNames(
+            'overflow-auto',
+            'scroll-smooth',
+            'scroll-p-6',
+            { 'pt-6': !hasSearch }
+          )}>
+            <Provider>
+              <TOCWrapper
+                hasSearch={hasSearch}
+                isError={isError}
+                isLoading={isLoading}
+                pages={filtered.pages}
+                selectedId={selectedId}
+                topLevelIds={filtered.topLevelIds}
+                onAnchorSelect={onAnchorSelect}
+                onPageSelect={onPageSelect}
+              />
+            </Provider>
+          </div>
+        )}
+      </div>
+    </>
   );
 };

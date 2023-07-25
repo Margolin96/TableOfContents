@@ -93,7 +93,7 @@ export const PageItem = ({ id }: PageItemProps) => {
         onClick={pageClickHandler}
       >
         <div className="w-4 flex flex-none flex-col justify-center">
-          {page.pages && (
+          {hasPages && (
             <Triangle className={isExpanded ? 'rotate-180' : 'rotate-90'} />
           )}
         </div>

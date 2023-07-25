@@ -1,15 +1,14 @@
-import { useSetAtom } from "jotai";
 import { ChangeEvent, useCallback } from "react";
-
-import { queryAtom } from "../store/store";
 
 import { debounce } from "./utils";
 
-export const Search = () => {
-  const setQuery = useSetAtom(queryAtom);
+interface SearchProps {
+  onChange: (value: string) => void;
+}
 
+export const Search = ({ onChange}: SearchProps) => {
   const debounced = debounce((value: string) => {
-    setQuery(value);
+    onChange(value);
   }, 500);
   
   const changeHandler = useCallback((event: ChangeEvent<HTMLInputElement>) => {

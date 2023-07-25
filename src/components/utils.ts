@@ -1,3 +1,5 @@
+import { PageId, PagesMap } from "../types/types";
+
 const widthClasses = [
   'w-8/12',
   'w-9/12',
@@ -57,3 +59,79 @@ export const debounce = (fn: Function, ms: number = 500): Function => {
     timeoutId = setTimeout(() => fn.apply(this, args), ms);
   };
 };
+
+/**
+ * Returns an array of all parent page IDs for a given page ID.
+ * @param {PagesMap} pages - A map containing the data of all pages.
+ * @param {PageId} id - The ID of the page for which to find parent pages.
+ * @returns {PageId[]} An array of parent page IDs.
+ */
+export const getAllParents = (pages: PagesMap, id: PageId): PageId[] => {
+  let currentPage = pages[id];
+
+  if (!currentPage) return [];
+
+  let page = currentPage.parentId ? pages[currentPage.parentId] : null;
+
+  const parents = new Set([currentPage.id]);
+
+  while (page && page.level >= 0) {
+    if (parents.has(page.id)) {
+      // Preventing looping.
+      console.warn('Recurring parent', page.id);
+
+      return [];
+    }
+
+    parents.add(page.id);
+    page = page.parentId ? pages[page.parentId] : null;
+  }
+
+  return Array.from(parents.values());
+}
+
+/**
+ * Returns filtered pages based on the search query.
+ *
+ * @param {string} query - The search query.
+ * @param {PageId[]} topLevelIds - An array of top-level page IDs.
+ * @param {PagesMap} pages - A map containing the data of all pages.
+ * @returns {FilteredPages} An object with filtered pages and their top-level IDs.
+ */
+export const getFilteredPages = (
+  query: string,
+  topLevelIds: PageId[],
+  pages: PagesMap
+): {
+  pages: PagesMap;
+  topLevelIds: PageId[];
+} => {
+  if (!query.trim()) return {
+    topLevelIds,
+    pages,
+  };
+
+  const filteredPages: PagesMap = {};
+  const sanitizedQuery = query.toLowerCase();
+
+  Object.values(pages).forEach((page) => {
+    if (page.title.toLowerCase().includes(sanitizedQuery)) {
+      filteredPages[page.id] = structuredClone(page);
+
+      const parentsIds = getAllParents(pages, page.id);
+
+      parentsIds.forEach((pageId) => {
+        filteredPages[pageId] = structuredClone(pages[pageId]);
+      });
+    }
+  });
+
+  Object.values(filteredPages).forEach((page) => {
+    page.pages = page.pages?.filter((pageId) => pageId in filteredPages);
+  });
+  
+  return {
+    pages: filteredPages,
+    topLevelIds: topLevelIds.filter((pageId) => pageId in filteredPages),
+  };
+}
