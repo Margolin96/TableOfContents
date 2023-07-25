@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { useAtomValue } from "jotai";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 import { usePageAnchors } from "../store/api";
 import { pagesAtom } from "../store/store";
@@ -23,10 +23,16 @@ export const Anchors = ({ pageId }: AnchorsProps) => {
     return pages[pageId];
   }, [pageId, pages]);
 
-  /**
-   * Fetch the page anchors for the specified page ID
-   */
+  // Fetch the page anchors for the specified page ID
   const anchors = usePageAnchors(pageId);
+
+  // Page item click handler.
+  const anchorClickHandler = useCallback((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    // TODO: set selected anchor
+  }, []);
 
   return (
     <>
@@ -36,7 +42,7 @@ export const Anchors = ({ pageId }: AnchorsProps) => {
 
       {!anchors.isLoading && !anchors.error && anchors.data && (
         anchors.data.map((anchor) => (
-          <div
+          <a
             key={anchor.id}
             className={classNames(
               "pr-8",
@@ -48,13 +54,15 @@ export const Anchors = ({ pageId }: AnchorsProps) => {
               "hover:bg-neutral-200",
               getPaddingLeftClass(page.level)
             )}
-            onClick={() => {/* TODO: Handle anchor click */}}
+            href={`${page.url}${anchor.anchor}`}
+            title={anchor.title}
+            onClick={anchorClickHandler}
           >
             <div className="w-4 flex flex-none"></div>
-            <div className="text-ellipsis whitespace-nowrap overflow-hidden" title={anchor.title}>
+            <div className="text-ellipsis whitespace-nowrap overflow-hidden">
               {anchor.title}
             </div>
-          </div>
+          </a>
         ))
       )}
     </>

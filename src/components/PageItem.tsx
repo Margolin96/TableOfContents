@@ -59,7 +59,10 @@ export const PageItem = ({ id }: PageItemProps) => {
   }, [page?.anchors]);
 
   // Page item click handler.
-  const pageClickHandler = useCallback(() => {
+  const pageClickHandler = useCallback((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
     if (page) {
       setSelected(page.id);
     }
@@ -71,7 +74,7 @@ export const PageItem = ({ id }: PageItemProps) => {
 
   return page && (
     <div id={page.id}>
-      <div
+      <a
         className={classNames(
           "pr-8",
           "py-2",
@@ -85,6 +88,8 @@ export const PageItem = ({ id }: PageItemProps) => {
             "bg-neutral-100": isSelected && hasAnchors,
           }
         )}
+        href={`${page.url}`}
+        title={page.title}
         onClick={pageClickHandler}
       >
         <div className="w-4 flex flex-none flex-col justify-center">
@@ -93,10 +98,10 @@ export const PageItem = ({ id }: PageItemProps) => {
           )}
         </div>
 
-        <div className="text-ellipsis whitespace-nowrap overflow-hidden" title={page.title}>
+        <div className="text-ellipsis whitespace-nowrap overflow-hidden">
           {page.title}
         </div>
-      </div>
+      </a>
 
       {isSelected && hasAnchors && <Anchors pageId={page.id} />}
 
