@@ -22,7 +22,7 @@ interface PageItemProps {
  */
 export const PageItem = ({ id }: PageItemProps) => {
   // Get the getter/setter for the selected page ID.
-  const [selected, setSelected] = useAtom(selectedPageAtom);
+  const [selectedPage, setSelectedPage] = useAtom(selectedPageAtom);
 
   // Get the setter for the expanded state.
   const setExpanded = useSetAtom(updateExpandedByIdAtom);
@@ -40,8 +40,8 @@ export const PageItem = ({ id }: PageItemProps) => {
 
   // Determine if the page is currently selected.
   const isSelected = useMemo(() => {
-    return page?.id === selected;
-  }, [page?.id, selected]);
+    return page?.id === selectedPage;
+  }, [page?.id, selectedPage]);
 
   // Determine if the page is expanded.
   const isExpanded = useMemo(() => {
@@ -59,18 +59,29 @@ export const PageItem = ({ id }: PageItemProps) => {
   }, [page?.anchors]);
 
   // Page item click handler.
-  const pageClickHandler = useCallback((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+  const pageClickHandler = useCallback((event: React.MouseEvent) => {
+    event.preventDefault();
+
+    if (!page) return;
+
+    if (isSelected) {
+      if (hasPages) {
+        setExpanded(page.id, !isExpanded);
+      }
+    } else {
+      setSelectedPage(page.id);
+    }
+  }, [page, isSelected, hasPages, setExpanded, isExpanded, setSelectedPage]);
+
+  // Collapse icon click handler.
+  const collapseClickHandler = useCallback((event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
 
-    if (page) {
-      setSelected(page.id);
-    }
+    if (!page || !page.pages) return;
 
-    if (page && hasPages) {
-      setExpanded(page.id, !isExpanded);
-    }
-  }, [page, hasPages, setSelected, setExpanded, isExpanded]);
+    setExpanded(page.id, !isExpanded);
+  }, [isExpanded, page, setExpanded]);
 
   return page && (
     <div id={page.id}>
@@ -92,7 +103,7 @@ export const PageItem = ({ id }: PageItemProps) => {
         title={page.title}
         onClick={pageClickHandler}
       >
-        <div className="w-4 flex flex-none flex-col justify-center">
+        <div className="w-4 flex flex-none flex-col justify-center" onClick={collapseClickHandler}>
           {hasPages && (
             <Triangle className={isExpanded ? 'rotate-180' : 'rotate-90'} />
           )}
