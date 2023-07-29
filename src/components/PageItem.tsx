@@ -3,9 +3,10 @@ import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useMemo } from "react";
 
 import { expandedIdsAtom, pagesAtom, selectedPageAtom, updateExpandedByIdAtom } from "../store/store";
-import { PageId } from "../types/types";
+import { Page, PageId } from "../types/types";
 
 import { Anchors } from "./Anchors";
+import { Collapsible } from "./Collapsible";
 import { Group } from "./Group";
 import { Triangle } from "./Triangle";
 import { getPaddingLeftClass } from "./utils";
@@ -34,28 +35,28 @@ export const PageItem = ({ id }: PageItemProps) => {
   const pages = useAtomValue(pagesAtom);
 
   // Get the page data.
-  const page = useMemo(() => {
+  const page = useMemo<Page | null>(() => {
     return (id in pages) ? pages[id] : null;
   }, [pages, id]);
 
   // Determine if the page is currently selected.
-  const isSelected = useMemo(() => {
+  const isSelected = useMemo<Boolean>(() => {
     return page?.id === selectedPage;
   }, [page?.id, selectedPage]);
 
   // Determine if the page is expanded.
-  const isExpanded = useMemo(() => {
-    return page && expanded.has(page.id);
+  const isExpanded = useMemo<Boolean>(() => {
+    return (page && expanded.has(page.id)) || false;
   }, [expanded, page]);
 
   // Determine if the page has child pages.
-  const hasPages = useMemo(() => {
-    return page?.pages && page.pages.length > 0;
+  const hasPages = useMemo<Boolean>(() => {
+    return (page?.pages && page.pages.length > 0) || false;
   }, [page?.pages]);
 
   // Determine if the page has anchors.
-  const hasAnchors = useMemo(() => {
-    return page?.anchors && page.anchors.length > 0;
+  const hasAnchors = useMemo<Boolean>(() => {
+    return (page?.anchors && page.anchors.length > 0) || false;
   }, [page?.anchors]);
 
   // Page item click handler.
@@ -114,9 +115,17 @@ export const PageItem = ({ id }: PageItemProps) => {
         </div>
       </a>
 
-      {isSelected && hasAnchors && <Anchors pageId={page.id} />}
+      {hasAnchors && (
+        <Collapsible visible={isSelected}>
+          <Anchors pageId={page.id} />
+        </Collapsible>
+      )}
 
-      {isExpanded && page.pages && <Group items={page.pages} />}
+      {page.pages && (
+        <Collapsible visible={isExpanded}>
+          <Group items={page.pages} />
+        </Collapsible>
+      )}
     </div>
   );
 };

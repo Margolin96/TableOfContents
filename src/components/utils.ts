@@ -1,4 +1,4 @@
-import { PageId, PagesMap } from "../types/types";
+import { PagesData, PageId, PagesMap } from "../types/types";
 
 const widthClasses = [
   'w-8/12',
@@ -102,10 +102,7 @@ export const getFilteredPages = (
   query: string,
   topLevelIds: PageId[],
   pages: PagesMap
-): {
-  pages: PagesMap;
-  topLevelIds: PageId[];
-} => {
+): PagesData => {
   if (!query.trim()) return {
     topLevelIds,
     pages,

@@ -3,7 +3,7 @@ import { Provider, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useMemo, useState } from "react";
 
 import { pagesAtom, selectedAnchorAtom, selectedPageAtom } from "../store/store";
-import { AnchorId, PageId, PagesMap } from "../types/types";
+import { AnchorId, PageId, PagesData, PagesMap } from "../types/types";
 
 import { Group } from "./Group";
 import { Placeholder } from "./Placeholder";
@@ -126,7 +126,7 @@ export const TOC = ({
 }: TOCProps) => {
   const [query, setQuery] = useState<string>('');
 
-  const filtered = useMemo(() => {
+  const filtered = useMemo<PagesData>(() => {
     return hasSearch && query.trim()
       ? getFilteredPages(query, topLevelIds, pages)
       : { topLevelIds, pages };

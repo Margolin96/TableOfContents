@@ -1,11 +1,8 @@
 import { act, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event'
+import userEvent from '@testing-library/user-event';
 
 import { TOC } from '../components/TOC';
 import { Anchor, PagesMap } from '../types/types';
-
-// @ts-ignore
-globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
 async function delay(ms: number) {
   return new Promise((r) => setTimeout(r, ms));

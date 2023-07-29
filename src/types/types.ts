@@ -24,3 +24,8 @@ export interface Anchor {
 
 export type PagesMap = Record<PageId, Page>;
 export type AnchorsMap = Record<AnchorId, Anchor>;
+
+export interface PagesData {
+  pages: PagesMap;
+  topLevelIds: PageId[];
+};
