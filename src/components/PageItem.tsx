@@ -121,10 +121,8 @@ export const PageItem = ({ id }: PageItemProps) => {
         </Collapsible>
       )}
 
-      {page.pages && (
-        <Collapsible key={page.pages.length} visible={isExpanded}>
-          <Group items={page.pages} />
-        </Collapsible>
+      {page.pages && isExpanded && (
+        <Group items={page.pages} />
       )}
     </div>
   );

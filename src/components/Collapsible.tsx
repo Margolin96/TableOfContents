@@ -25,8 +25,9 @@ export const Collapsible = ({ visible, duration = 150, children }: PropsWithChil
   return (
     <div
       ref={nodeRef}
-      className="transition-all overflow-hidden h-screen"
+      className="transition-all overflow-hidden"
       style={{
+        height: `${height}px`,
         maxHeight: `${height}px`,
         transitionDuration: `${duration}ms`
       }}
