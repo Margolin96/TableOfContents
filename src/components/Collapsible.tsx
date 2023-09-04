@@ -1,4 +1,4 @@
-import { PropsWithChildren, useEffect, useRef, useState } from 'react';
+import { PropsWithChildren, useEffect, useState } from 'react';
 
 interface CollapsibleProps {
   /** Whether the content should be visible or hidden. */
@@ -11,28 +11,32 @@ interface CollapsibleProps {
 /**
  * A collapsible component that can hide or show its children with a smooth transition.
  */
-export const Collapsible = ({ visible, duration = 150, children }: PropsWithChildren<CollapsibleProps>) => {
-  const nodeRef = useRef<HTMLDivElement>(null);
-  const [height, setHeight] = useState<number>(0);
+export const Collapsible = ({ visible, duration = 300, children }: PropsWithChildren<CollapsibleProps>) => {
+  const [visibility, setVisibility] = useState<Boolean>(visible);
+  const [maxHeight, setMaxHeight] = useState<string>();
 
-  // Set content height based on visibility and content height.
   useEffect(() => {
-    if (!nodeRef.current) return;
+    if (visible) {
+      setVisibility(visible);
+    } else {
+      setTimeout(() => {
+        setVisibility(visible);
+      }, duration);
+    }
 
-    setHeight(visible ? nodeRef.current.scrollHeight : 0);
-  }, [visible]);
+    setMaxHeight('100vh');
+
+    setTimeout(() => {
+      setMaxHeight(visible ? 'unset' : '0');
+    }, visible ? duration : 1);
+  }, [duration, visible]);
 
   return (
     <div
-      ref={nodeRef}
       className="transition-all overflow-hidden"
-      style={{
-        height: `${height}px`,
-        maxHeight: `${height}px`,
-        transitionDuration: `${duration}ms`
-      }}
+      style={{ maxHeight, transitionDuration: `${duration}ms` }}
     >
-      {visible && children}
+      {visibility && children}
     </div>
   );
 };

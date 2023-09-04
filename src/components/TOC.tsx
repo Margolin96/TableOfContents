@@ -157,7 +157,7 @@ export const TOC = ({
         )}
 
         {!isLoading && isError && (
-          <div className="px-6 py-2 text-red-400 italic text-sm">
+          <div className="px-6 py-2 text-red-400 italic text-sm mt-6 leading-7">
             Unable to load table of contents
           </div>
         )}
